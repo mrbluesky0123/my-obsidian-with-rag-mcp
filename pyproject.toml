@@ -1,0 +1,16 @@
+[project]
+name = "obsidian-with-rag"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "black>=25.1.0",
+    "langchain>=0.3.27",
+    "langchain-chroma>=0.2.5",
+    "langchain-google-genai>=2.1.10",
+    "markdown>=3.8.2",
+    "mcp>=1.13.1",
+    "pathlib>=1.0.1",
+    "python-dotenv>=1.1.1",
+    "python-frontmatter>=1.1.0",
+]

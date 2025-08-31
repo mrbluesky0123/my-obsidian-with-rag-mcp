@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "obsidian-rag": {
+      "command": "/Users/mrbluesky/code/obsidian_with_rag/.venv/bin/python",
+      "args": ["/Users/mrbluesky/code/obsidian_with_rag/mcp_server.py"],
+      "cwd": "/Users/mrbluesky/code/obsidian_with_rag"
+    }
+  }
+}

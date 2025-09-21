@@ -22,8 +22,9 @@ server = Server("obsidian-rag")
 # 설정
 VAULT_PATH = "/Users/mrbluesky/Documents/memo"  # 옵시디언 볼트 경로
 # Claude Desktop 샌드박스를 위해 홈 디렉토리 사용
-import tempfile
 VECTORDB_PATH = os.path.expanduser("~/obsidian_vectordb")
+# 임베딩 타입 설정 ("google" 또는 "kosimcse" 또는 "ollama")
+EMBEDDING_TYPE = os.getenv("EMBEDDING_TYPE", "ollama")
 
 # 벡터DB 인스턴스 (지연 로딩)
 db = None
@@ -32,7 +33,7 @@ def ensure_vectordb():
     """벡터DB 초기화 (필요시)"""
     global db
     if db is None:
-        db = VectorDB(VECTORDB_PATH)
+        db = VectorDB(VECTORDB_PATH, embedding_type=EMBEDDING_TYPE)
         
         # 벡터DB가 비어있으면 초기화
         try:
@@ -221,7 +222,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 shutil.rmtree(VECTORDB_PATH)
             
             # 새로운 벡터DB 생성
-            db = VectorDB(VECTORDB_PATH)
+            db = VectorDB(VECTORDB_PATH, embedding_type=EMBEDDING_TYPE)
             documents = process_obsidian_vault(VAULT_PATH)
             db.add_documents(documents)
             

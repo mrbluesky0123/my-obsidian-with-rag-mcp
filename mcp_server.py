@@ -15,6 +15,11 @@ import frontmatter
 
 from src.vectorstore.vector_db import VectorDB
 from src.obsidian.obsidian_loader import process_obsidian_vault, clean_text
+from src.logging.logger_factory import LoggerFactory, init_logging
+
+# 로깅 초기화
+init_logging()
+logger = LoggerFactory.get_logger("obsidian_rag.mcp_server")
 
 # MCP 서버 생성
 server = Server("obsidian-rag")
@@ -33,19 +38,20 @@ def ensure_vectordb():
     """벡터DB 초기화 (필요시)"""
     global db
     if db is None:
+        logger.info(f"벡터DB 초기화 시작 - 타입: {EMBEDDING_TYPE}, 경로: {VECTORDB_PATH}")
         db = VectorDB(VECTORDB_PATH, embedding_type=EMBEDDING_TYPE)
-        
+
         # 벡터DB가 비어있으면 초기화
         try:
             test_results = db.search("test", k=1)
             if not test_results:
-                print("벡터DB가 비어있습니다. 옵시디언 노트를 로딩중...")
+                logger.info("벡터DB가 비어있습니다. 옵시디언 노트를 로딩중...")
                 documents = process_obsidian_vault(VAULT_PATH)
                 db.add_documents(documents)
-                print("✅ 옵시디언 노트 로딩 완료!")
+                logger.info("✅ 옵시디언 노트 로딩 완료!")
         except Exception as e:
-            print(f"벡터DB 초기화 중: {e}")
-    
+            logger.error(f"벡터DB 초기화 중 오류: {e}", exc_info=True)
+
     return db
 
 
@@ -213,25 +219,29 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     elif name == "refresh_obsidian_vectordb":
         try:
             global db
-            
-            print("🔄 벡터DB 새로고침 시작...")
-            
+
+            logger.info("🔄 벡터DB 새로고침 시작...")
+
             # 기존 벡터DB 삭제
             import shutil
             if os.path.exists(VECTORDB_PATH):
                 shutil.rmtree(VECTORDB_PATH)
-            
+                logger.info("기존 벡터DB 삭제 완료")
+
             # 새로운 벡터DB 생성
             db = VectorDB(VECTORDB_PATH, embedding_type=EMBEDDING_TYPE)
             documents = process_obsidian_vault(VAULT_PATH)
             db.add_documents(documents)
-            
+
+            logger.info(f"✅ 벡터DB 새로고침 완료! 총 {len(documents)}개 문서 청크 업데이트")
+
             response = f"✅ 벡터DB 새로고침 완료!\n"
             response += f"📊 총 {len(documents)}개 문서 청크가 업데이트되었습니다."
-            
+
             return [TextContent(type="text", text=response)]
-            
+
         except Exception as e:
+            logger.error(f"벡터DB 새로고침 실패: {str(e)}", exc_info=True)
             return [TextContent(type="text", text=f"❌ 벡터DB 새로고침 실패: {str(e)}")]
     
     return [TextContent(type="text", text=f"❌ 알 수 없는 도구: {name}")]
@@ -241,14 +251,19 @@ async def main():
     """MCP 서버 실행"""
     try:
         # 초기화
-        print("🚀 옵시디언 RAG MCP 서버 시작 중...")
+        logger.info("🚀 옵시디언 RAG MCP 서버 시작 중...")
+        logger.info(f"볼트 경로: {VAULT_PATH}")
+        logger.info(f"벡터DB 경로: {VECTORDB_PATH}")
+        logger.info(f"임베딩 타입: {EMBEDDING_TYPE}")
+
         ensure_vectordb()
-        print("✅ 초기화 완료!")
-        
+        logger.info("✅ 초기화 완료!")
+
         # 서버 실행
+        logger.info("MCP 서버 스트림 대기 중...")
         async with stdio_server() as streams:
             await server.run(
-                streams[0], streams[1], 
+                streams[0], streams[1],
                 InitializationOptions(
                     server_name="obsidian-rag",
                     server_version="1.0.0",
@@ -258,7 +273,7 @@ async def main():
                 )
             )
     except Exception as e:
-        print(f"❌ MCP 서버 오류: {e}")
+        logger.error(f"❌ MCP 서버 오류: {e}", exc_info=True)
         raise
 
 

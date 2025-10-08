@@ -1,6 +1,9 @@
 import requests
 from typing import List
 from langchain.embeddings.base import Embeddings
+from src.logging.logger_factory import LoggerFactory
+
+logger = LoggerFactory.get_logger("obsidian_rag.ollama_embeddings")
 
 
 class OllamaEmbeddings(Embeddings):
@@ -9,7 +12,7 @@ class OllamaEmbeddings(Embeddings):
     def __init__(self, model_name: str = "hf.co/Qwen/Qwen3-Embedding-8B-GGUF:Q4_K_M", base_url: str = "http://localhost:11434"):
         self.model_name = model_name
         self.base_url = base_url
-        print(f"🤖 Ollama 임베딩 초기화: {model_name}")
+        logger.info(f"🤖 Ollama 임베딩 초기화: {model_name}, URL: {base_url}")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         """문서들을 임베딩"""

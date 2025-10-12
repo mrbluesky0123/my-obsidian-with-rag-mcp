@@ -74,7 +74,6 @@ coverage.xml
 logs/
 
 # 임시 테스트 파일
-test_*.py
 quick_test.py
 temp_*.py
 

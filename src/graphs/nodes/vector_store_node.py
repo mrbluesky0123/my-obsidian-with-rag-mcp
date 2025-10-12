@@ -1,20 +1,20 @@
 """Node for storing embeddings in vector database."""
 import os
-from typing import Dict, Any
+from langgraph.types import RunnableConfig
 
 from src.schemas.document import IndexingState
 from src.vectorstore.vector_db import VectorDB
 
 
-def vector_store_node(state: IndexingState, config: Dict[str, Any]) -> IndexingState:
+def vector_store_node(state: IndexingState, config: RunnableConfig) -> IndexingState:
     try:
         if state.error:
             return state
 
         # 설정
-        db_path = config.get("db_path", "./obsidian_vectordb")
+        db_path = config.get("configurable", {}).get("db_path", "./obsidian_vectordb")
         embedding_type = os.getenv("EMBEDDING_TYPE", "ollama")
-        use_reranking = config.get("use_reranking", False)
+        use_reranking = config.get("configurable", {}).get("use_reranking", False)
 
         vector_db = VectorDB(
             persist_directory=db_path,

@@ -67,7 +67,7 @@ def parse_markdown_file(file_path: Path, vault_path: str) -> Dict[str, Any]:
             "source": str(file_path),
             "title": clean_text(post.metadata.get("title", file_path.stem)),  # 제목도 정리
             "tags": ", ".join(post.metadata.get("tags", [])),  # 리스트를 문자열로 변환
-            "date": str(post.metadata.get("date", "")),  # None일 수 있으니 문자열로 변환
+            "create_date": str(post.metadata.get("create date", "")),  # 옵시디언 기본 키
             "file_name": file_path.name,
         },
     }

@@ -12,7 +12,7 @@ class Document(BaseModel):
         default_factory=dict,
         description="문서의 메타데이터(파일명, 경로, 태그 등)"
     )
-    created_at: Optional[datetime] = Field(
+    created_at: Optional[str] = Field(
         default=None,
         description="문서 생성 시간"
     )

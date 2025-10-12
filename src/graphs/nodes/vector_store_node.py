@@ -4,9 +4,14 @@ from langgraph.types import RunnableConfig
 
 from src.schemas.document import IndexingState
 from src.vectorstore.vector_db import VectorDB
-
+from src.logging.logger_factory import LoggerFactory
+logger = LoggerFactory.get_logger("obsidian_rag.ollama_embeddings")
 
 def vector_store_node(state: IndexingState, config: RunnableConfig) -> IndexingState:
+    logger.info(f"{'*' * 50}")
+    logger.info("VECTOR_STORE_NODE")
+    logger.info(f"{'*' * 50}")
+
     try:
         if state.error:
             return state

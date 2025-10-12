@@ -4,8 +4,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.schemas.document import IndexingState, Chunk
 
+from src.logging.logger_factory import LoggerFactory
+logger = LoggerFactory.get_logger("obsidian_rag.ollama_embeddings")
 
 def chunking_node(state: IndexingState, config: RunnableConfig) -> IndexingState:
+    logger.info(f"{'*' * 50}")
+    logger.info("CHUNKING_NODE")
+    logger.info(f"{'*' * 50}")
+
     try:
         if state.error:
             return state

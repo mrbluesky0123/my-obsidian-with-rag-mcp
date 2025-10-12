@@ -3,10 +3,14 @@ from langgraph.types import RunnableConfig
 
 from src.obsidian.obsidian_loader import get_raw_documents
 from src.schemas.document import IndexingState, Document
-
+from src.logging.logger_factory import LoggerFactory
+logger = LoggerFactory.get_logger("obsidian_rag.ollama_embeddings")
 
 def obsidian_read_node(state: IndexingState, config: RunnableConfig) -> IndexingState:
     """옵시디언 문서를 읽어오는 노드"""
+    logger.info(f"{'*' * 50}")
+    logger.info("OBSIDIAN_READ_NODE")
+    logger.info(f"{'*' * 50}")
     try:
         # RunnableConfig에서 configurable 가져오기
         vault_path = config.get("configurable", {}).get("vault_path")

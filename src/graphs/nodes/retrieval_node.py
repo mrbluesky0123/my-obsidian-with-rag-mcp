@@ -4,10 +4,14 @@ from langgraph.types import RunnableConfig
 
 from src.schemas.query import QueryState, SearchResult
 from src.vectorstore.vector_db import VectorDB
-
+from src.logging.logger_factory import LoggerFactory
+logger = LoggerFactory.get_logger("obsidian_rag.ollama_embeddings")
 
 def retrieval_node(state: QueryState, config: RunnableConfig) -> QueryState:
     """벡터 DB에서 유사 문서를 검색하는 노드"""
+    logger.info(f"{'*' * 50}")
+    logger.info("RETRIEVAL_NODE")
+    logger.info(f"{'*' * 50}")
     try:
         if state.error or not state.query:
             return state

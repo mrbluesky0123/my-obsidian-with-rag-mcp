@@ -2,10 +2,15 @@
 from langgraph.types import RunnableConfig
 
 from src.schemas.query import QueryState
-
+from src.logging.logger_factory import LoggerFactory
+logger = LoggerFactory.get_logger("obsidian_rag.ollama_embeddings")
 
 def context_builder_node(state: QueryState, config: RunnableConfig) -> QueryState:
     """MCP 응답용 컨텍스트를 생성하는 노드"""
+    logger.info(f"{'*' * 50}")
+    logger.info("CONTEXT_BUILDER_NODE")
+    logger.info(f"{'*' * 50}")
+
     try:
         if state.error or not state.retrieved_results:
             return state

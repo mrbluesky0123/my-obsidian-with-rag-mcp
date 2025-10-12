@@ -55,7 +55,7 @@ def create_text_splitter(chunk_size: int = 1000, chunk_overlap: int = 200):
     )
 
 
-def parse_markdown_file(file_path: Path) -> Dict[str, Any]:
+def parse_markdown_file(file_path: Path, vault_path: str) -> Dict[str, Any]:
     """마크다운 파일 하나 파싱"""
     with open(file_path, "r", encoding="utf-8") as f:
         post = frontmatter.load(f)
@@ -63,6 +63,7 @@ def parse_markdown_file(file_path: Path) -> Dict[str, Any]:
     return {
         "content": clean_text(post.content),  # 텍스트 정리
         "metadata": {
+            "id": str(file_path.relative_to(vault_path)),
             "source": str(file_path),
             "title": clean_text(post.metadata.get("title", file_path.stem)),  # 제목도 정리
             "tags": ", ".join(post.metadata.get("tags", [])),  # 리스트를 문자열로 변환
@@ -86,7 +87,11 @@ def create_document_chunks(
     document_chunks = []
     for i, chunk in enumerate(chunks):
         chunk_metadata = parsed_doc["metadata"].copy()
-        chunk_metadata.update({"chunk_index": i, "total_chunks": len(chunks)})
+        chunk_metadata.update({
+            "chunk_index": i,
+            "total_chunks": len(chunks),
+            "document_id": parsed_doc["metadata"]["id"],
+        })
 
         document_chunks.append({"content": chunk, "metadata": chunk_metadata})
 
@@ -97,15 +102,15 @@ def process_obsidian_vault(
     vault_path: str, chunk_size: int = 1000, chunk_overlap: int = 200
 ) -> List[Dict[str, Any]]:
     """옵시디언 볼트 전체 처리"""
-    vault_path = Path(vault_path)
+    path_of_vault = Path(vault_path)
     text_splitter = create_text_splitter(chunk_size, chunk_overlap)
     all_chunks = []
 
-    for md_file in vault_path.rglob("*.md"):
+    for md_file in path_of_vault.rglob("*.md"):
         print(f"📖 처리 중: {md_file.name}")
 
         try:
-            parsed_doc = parse_markdown_file(md_file)
+            parsed_doc = parse_markdown_file(md_file, vault_path)
             chunks = create_document_chunks(parsed_doc, text_splitter)
             all_chunks.extend(chunks)
         except Exception as e:
@@ -113,3 +118,21 @@ def process_obsidian_vault(
 
     print(f"✅ 총 {len(all_chunks)}개 청크 생성")
     return all_chunks
+
+def get_raw_documents(vault_path: str) -> List[Dict[str, Any]]:
+    """
+    옵시디언 볼트로부터 raw documents를 가져옴
+    LangGraph를 이용하여 노드별로 역할을 구분하기 위해 process_obsidian_vault 함수의 기능을 쪼갬
+    """
+    path_of_vault = Path(vault_path)
+    raw_documents = []
+
+    for md_file in path_of_vault.rglob("*.md"):
+        print(f"📖 처리 중: {md_file.name}")
+
+        try:
+            raw_documents.append(parse_markdown_file(md_file, str(vault_path)))
+        except Exception as e:
+            print(f"❌ 에러 {md_file}: {e}")
+
+    return raw_documents

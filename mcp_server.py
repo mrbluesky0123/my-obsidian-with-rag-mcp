@@ -41,16 +41,16 @@ def ensure_vectordb():
         logger.info(f"벡터DB 초기화 시작 - 타입: {EMBEDDING_TYPE}, 경로: {VECTORDB_PATH}")
         db = VectorDB(VECTORDB_PATH, embedding_type=EMBEDDING_TYPE)
 
-        # 벡터DB가 비어있으면 초기화
-        try:
-            test_results = db.search("test", k=1)
-            if not test_results:
-                logger.info("벡터DB가 비어있습니다. 옵시디언 노트를 로딩중...")
-                documents = process_obsidian_vault(VAULT_PATH)
-                db.add_documents(documents)
-                logger.info("✅ 옵시디언 노트 로딩 완료!")
-        except Exception as e:
-            logger.error(f"벡터DB 초기화 중 오류: {e}", exc_info=True)
+        # # 벡터DB가 비어있으면 초기화
+        # try:
+        #     test_results = db.search("test", k=1)
+        #     if not test_results:
+        #         logger.info("벡터DB가 비어있습니다. 옵시디언 노트를 로딩중...")
+        #         documents = process_obsidian_vault(VAULT_PATH)
+        #         db.add_documents(documents)
+        #         logger.info("✅ 옵시디언 노트 로딩 완료!")
+        # except Exception as e:
+        #     logger.error(f"벡터DB 초기화 중 오류: {e}", exc_info=True)
 
     return db
 
